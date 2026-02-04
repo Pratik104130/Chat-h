@@ -549,7 +549,7 @@ h4{
     width: 700px;
 
 }
-
+/*change*/
 .msg::before {
   content: "";
   position: absolute;
