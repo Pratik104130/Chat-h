@@ -9,6 +9,8 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  
+  
 
 <div class="chat-container">
   <h4>Made By Pratik</h4>
@@ -28,6 +30,7 @@
     <div id="typing"></div>
 
   <input id="username" placeholder="Enter your name">
+  <div id="nameError"></div>
   
   <div class="input-box">
     <input class="msg-main"id="message"placeholder="Type message...">
@@ -38,6 +41,51 @@
 <audio id="notifySound" preload="auto">
   <source src="/sounds/notification.mp3" type="audio/mpeg">
 </audio>
+
+<!-- ADMIN LIFEBOAT -->
+<div id="adminPanel">
+  <h3>🛟 Admin</h3>
+  
+  <!-- ===== GROUP CONTROL ===== -->
+  <button onclick="adminClearGroup()">🧹 Clear Group</button>
+  
+  <hr>
+  
+  <!-- ===== USER CONTROL ===== -->
+  <input id="targetUser" placeholder="Username">
+  
+  <button onclick="adminMute()">🔇 Mute 10 min</button>
+  <button onclick="adminUnmute()">🔊 Unmute</button>
+  
+  <button onclick="adminKick()">🚫 Kick User</button>
+  
+  <button onclick="adminShadowMute()">👻 Shadow Mute</button>
+  <button onclick="adminShadowUnmute()">🔊 Shadow Unmute</button>
+  
+  <hr>
+  
+  <!-- ===== MESSAGE CONTROL ===== -->
+  <input id="lockMessageId" placeholder="Message ID">
+  
+  <button onclick="adminLockMessage()">🔒 Lock Message</button>
+  <button onclick="adminUnlockMessage()">🔓 Unlock Message</button>
+  
+  <hr>
+  
+  <!-- ===== ANNOUNCEMENT ===== -->
+  <button onclick="adminAnnouncement()">📢 Announcement</button>
+  
+  <hr>
+  
+  <!-- ===== SLASH COMMAND SYSTEM ===== -->
+  <input id="adminCommand" placeholder="/mute user 10">
+  
+  <button onclick="runAdminCommand()">⚡ Run Command</button>
+</div>
+
+<!-- ===== TOGGLE BUTTON ===== -->
+<div id="adminToggle" onclick="toggleAdminPanel()">🛟</div>
+
 
 
 <script src="script.js"></script>

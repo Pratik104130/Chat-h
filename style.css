@@ -340,7 +340,16 @@ h4{
 
 }
 
+#nameError {
+    font-size: 13px;
+    color: #ff4d4d;
+    margin-top: 4px;
+}
 
+#sendBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
 
 
 
@@ -370,6 +379,16 @@ h4{
     
 }
 
+#nameError {
+    font-size: 33px;
+    color: #ff4d4d;
+    margin-top: 4px;
+}
+
+#sendBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
 
 #exitGroupBtn {
     background:linear-gradient(70deg,red,#FF53A7);
@@ -588,6 +607,50 @@ h4{
 .date-separator{
     font-size: 27px;
 }
+
+
+#adminPanel {
+    position: fixed;
+    left: 350px;
+    top: 600px;
+    width: 300px;
+    background: #111;
+    color: #fff;
+    padding: 22px;
+    border-radius: 10px;
+    z-index: 999;
+}
+
+#adminPanel input {
+    width: 100%;
+    margin: 6px 0;
+    padding: 6px;
+}
+
+#adminPanel button {
+    width: 100%;
+    height: 36px;
+    font-size: 23px;
+    margin: 4px 0;
+    padding: 9px;
+    background:linear-gradient(30deg,#DD80FF,#BA80FF);
+    color: antiquewhite;
+    border: none;
+    border-radius: 5px;
+}
+
+#adminToggle {
+    position: fixed;
+    left: 20px;
+    bottom: 30px;
+    background: crimson;
+    color: white;
+    padding: 10px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 1000;
+}
+
 
 
 
