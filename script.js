@@ -1,5 +1,11 @@
 // ================= FIREBASE CONFIG =================
+//new 
+/*
+
+  
+  */
 var firebaseConfig = {
+  /*
   apiKey: "AIzaSyCRykGgYV0t3vqe1MraK7Hvg2uZvuhna4E",
   authDomain: "chat-alp.firebaseapp.com",
   databaseURL: "https://chat-alp-default-rtdb.firebaseio.com",
@@ -7,6 +13,16 @@ var firebaseConfig = {
   storageBucket: "chat-alp.appspot.com",
   messagingSenderId: "891719681818",
   appId: "1:891719681818:web:9fa3e65816b6db43c18ea3"
+  */
+  
+  apiKey: "AIzaSyADxzsQX1gL8R4Y4h2O1eEFSGzpDJJ4Qrk",
+  authDomain: "cagtappher.firebaseapp.com",
+  databaseURL: "https://cagtappher-default-rtdb.firebaseio.com",
+  projectId: "cagtappher",
+  storageBucket: "cagtappher.firebasestorage.app",
+  messagingSenderId: "385649044827",
+  appId: "1:385649044827:web:557f04df5411ac8c7c3e7e"
+  
 };
 
 firebase.initializeApp(firebaseConfig);
