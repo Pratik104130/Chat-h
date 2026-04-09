@@ -15,14 +15,23 @@ var firebaseConfig = {
   appId: "1:891719681818:web:9fa3e65816b6db43c18ea3"
   */
   
-  apiKey: "AIzaSyADxzsQX1gL8R4Y4h2O1eEFSGzpDJJ4Qrk",
+/*  apiKey: "AIzaSyADxzsQX1gL8R4Y4h2O1eEFSGzpDJJ4Qrk",
   authDomain: "cagtappher.firebaseapp.com",
   databaseURL: "https://cagtappher-default-rtdb.firebaseio.com",
   projectId: "cagtappher",
   storageBucket: "cagtappher.firebasestorage.app",
   messagingSenderId: "385649044827",
   appId: "1:385649044827:web:557f04df5411ac8c7c3e7e"
-  
+ */
+ 
+ apiKey: "AIzaSyDqpgpMsPKrOp3hveeKerTXl5mwSeGA9_0",
+  authDomain: "chatapp-b2062.firebaseapp.com",
+  databaseURL: "https://chatapp-b2062-default-rtdb.asia-southeast1.firebasedatabase.app/",
+
+  projectId: "chatapp-b2062",
+  storageBucket: "chatapp-b2062.firebasestorage.app",
+  messagingSenderId: "413990053783",
+  appId: "1:413990053783:web:478f79f329a2b0283146d2",
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -710,3 +719,4 @@ cleanOldMessages();
 setInterval(() => {
   cleanOldMessages();
 }, 60 * 60 * 1000); // clean every hour
+
