@@ -4,92 +4,1150 @@
   <title>Group Chat</title>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-  
-<!--hey-->
-  <link rel="stylesheet" href="style.css">
+  <style>
+body {
+    background: #E6D9FF;
+    font-family: Arial, sans-serif;
+    overscroll-behavior: contain;
+}
+html, body { touch-action: pan-x pan-y; }
+input, textarea, select {
+    font-size: 17px !important;
+    line-height: 1.4;
+    touch-action: manipulation;
+    -webkit-text-size-adjust: 100%;
+}
+@supports (-webkit-touch-callout: none) {
+    input, textarea { font-size: 17px !important; }
+}
+.chat-container {
+    width: 400px;
+    height: 220px;
+    position: relative;
+    left: -6px;
+    top: -5px;
+    margin: 10px auto;
+    background: url("/images/3.jpg");
+    background-size: 450px;
+    border-radius: 12px;
+    padding: 10px;
+}
+#status { font-size: 12px; color: green; margin-bottom: 5px; }
+#onlineUsers { font-size: 15px; }
+#messages {
+    height: 370px;
+    overflow-y: auto;
+    margin-left: 10px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    display: flex;
+    flex-direction: column;
+    scroll-behavior: smooth;
+}
+.msg {
+    position: relative;
+    padding: 12px 10px;
+    margin: 5px 0;
+    border-radius: 5px;
+    max-width: 50%;
+    box-shadow: 1px 2px 0 #ccc;
+    margin-bottom: 5px;
+    animation: popIn 0.25s ease-out;
+}
+@keyframes popIn {
+    from { opacity: 0; transform: translateY(8px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.msg.you {
+    background: linear-gradient(30deg, #F64FFF, #F989FF);
+    margin-left: auto;
+    border-bottom-right-radius: 12px;
+}
+.msg.other {
+    background: linear-gradient(30deg, #D0B1FF, #C098FF, #9B5BFF);
+    margin-right: auto;
+    margin-top: 10px;
+    border-bottom-left-radius: 10px;
+}
+.msg + .msg.you   { margin-top: 2px; }
+.msg + .msg.other { margin-top: 2px; }
+.msg .time { font-size: 15px; color: gray; position: absolute; right: 5px; bottom: 2px; }
+.delete { font-size: 13px; color: red; cursor: pointer; }
+.chat-img {
+    max-width: 180px;
+    max-height: 180px;
+    border-radius: 8px;
+    display: block;
+    margin-top: 4px;
+    cursor: pointer;
+}
+#profileRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+    margin-left: 10px;
+}
+#avatarPreview {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #9B5BFF, #F64FFF);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    overflow: hidden;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    flex-shrink: 0;
+}
+#avatarInitial { color: #fff; font-weight: bold; font-size: 16px; pointer-events: none; }
+#avatarImg { width: 100%; height: 100%; object-fit: cover; }
+.msg-avatar {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    margin-right: 5px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #fff;
+    flex-shrink: 0;
+}
+.msg-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.msg-header { display: flex; align-items: center; margin-bottom: 3px; }
+#dmBtn {
+    background: linear-gradient(30deg, #9B5BFF, #F64FFF);
+    border-radius: 6px;
+    font-size: 13px;
+    padding: 5px 10px;
+}
+#dmPanel {
+    margin: 8px 10px;
+    border: 2px solid #9B5BFF;
+    border-radius: 10px;
+    background: #f4efff;
+    padding: 8px;
+}
+#dmHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+#dmWithLabel { font-size: 14px; font-weight: bold; color: #6015AF; }
+#closeDmBtn { background: #ccc; color: #333; font-size: 12px; padding: 3px 8px; border-radius: 4px; }
+#dmMessages {
+    height: 180px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 4px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    background: #fff;
+}
+.dm-msg {
+    padding: 7px 10px;
+    border-radius: 8px;
+    max-width: 70%;
+    font-size: 14px;
+    position: relative;
+    animation: popIn 0.2s ease-out;
+}
+.dm-msg.you { background: linear-gradient(30deg, #F64FFF, #F989FF); margin-left: auto; }
+.dm-msg.other { background: linear-gradient(30deg, #D0B1FF, #9B5BFF); margin-right: auto; }
+.dm-msg .dm-name { font-size: 11px; font-weight: bold; margin-bottom: 2px; opacity: 0.75; }
+.dm-msg .dm-time { font-size: 10px; color: gray; position: absolute; right: 5px; bottom: 2px; }
+#inviteLinkBtn {
+    background: linear-gradient(30deg, #25d366, #1aab52);
+    font-size: 13px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    margin-left: 4px;
+}
+#imgUploadLabel {
+    font-size: 22px;
+    cursor: pointer;
+    padding: 4px 8px;
+    display: flex;
+    align-items: center;
+    background: #eee;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    user-select: none;
+}
+.input-box {
+    display: flex;
+    margin-top: 6px;
+    margin-left: 10px;
+    gap: 4px;
+    align-items: center;
+}
+input { padding: 8px; font-size: 15px; }
+input, button { touch-action: manipulation; }
+#message { flex: 1; }
+button { background: #25d366; color: white; border: none; padding: 8px 12px; cursor: pointer; }
+.tick { font-size: 11px; margin-left: 6px; color: gray; }
+.tick.seen { color: blue; }
+#typing { opacity: 0.7; animation: breathe 1.6s ease-in-out infinite; margin-left: 10px; }
+@keyframes breathe {
+    0%   { opacity: 0.3; }
+    50%  { opacity: 0.9; }
+    100% { opacity: 0.3; }
+}
+button:active { transform: scale(0.97); }
+#createGroupBtn { padding: 5px 10px; cursor: pointer; }
+#exitGroupBtn {
+    background: red;
+    box-shadow: 3px 2px 2px #000;
+    font-size: 14px;
+    height: 30px;
+    position: absolute;
+    top: 1px;
+    left: 280px;
+}
+#joinGroupBtn {
+    height: 33px;
+    font-size: 15px;
+    margin-left: 9.7rem;
+    margin-top: 3.3rem;
+    background: linear-gradient(30deg, #B044C5, #B044C5);
+    box-shadow: 2px 3px 4px #000;
+}
+#username { width: 150px; border: 1px #000; background: #EEFCFF; }
+.msg-main { background: #FAFEFF; }
+#sendBtn {
+    background: linear-gradient(40deg, #CBA7FF, #8D3CFF);
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+#sendDmBtn {
+    background: linear-gradient(40deg, #CBA7FF, #8D3CFF);
+    border-radius: 5px;
+    font-size: 14px;
+    padding: 6px 12px;
+}
+h4 { font-size: 12px; font-family: fantasy; color: #fff; animation: ani 5s linear infinite; }
+@keyframes ani {
+    0%   { color: #F0BBFF; text-shadow: 0 0 2px #000; }
+    10%  { color: #fff; font-family: fantasy; }
+    20%  { color: #ccc; }
+    30%  { color: #FF4590; }
+}
+.date-separator { text-align: center; margin: 12px 0; font-size: 14px; display: flex; justify-content: center; }
+.date-separator span { background: rgba(0,0,0,0.15); padding: 4px 12px; border-radius: 14px; font-weight: bold; }
+.msg.you::after {
+    content: "";
+    position: absolute;
+    right: -6px; bottom: 0;
+    width: 0; height: 0;
+    border-left: 6px solid #FBB2FF;
+    border-top: 6px solid transparent;
+}
+.msg.other::after {
+    content: "";
+    position: absolute;
+    left: -6px; bottom: 0;
+    width: 0; height: 0;
+    border-top: 6px solid transparent;
+}
+#messages::-webkit-scrollbar { width: 6px; }
+#messages::-webkit-scrollbar-thumb { border-radius: 10px; }
+#nameError { font-size: 13px; color: #ff4d4d; margin-top: 4px; }
+#sendBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+#adminPanel {
+    position: fixed;
+    right: 10px; top: 60px;
+    width: 240px;
+    background: #111;
+    color: #fff;
+    padding: 16px;
+    border-radius: 10px;
+    z-index: 999;
+    display: none;
+}
+#adminPanel input { width: 100%; margin: 6px 0; padding: 6px; font-size: 14px !important; }
+#adminPanel button {
+    width: 100%; height: 36px; font-size: 14px;
+    margin: 4px 0; padding: 6px;
+    background: linear-gradient(30deg, #DD80FF, #BA80FF);
+    color: antiquewhite; border: none; border-radius: 5px;
+}
+#adminToggle {
+    position: fixed; left: 20px; bottom: 30px;
+    background: crimson; color: white;
+    padding: 10px; border-radius: 50%;
+    cursor: pointer; z-index: 1000; font-size: 20px;
+}
+#lightbox {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+}
+#lightbox.active { display: flex; }
+#lightbox img { max-width: 90vw; max-height: 90vh; border-radius: 8px; }
+
+@media (min-width: 500px) {
+    .chat-container {
+        width: 770px; height: 300px;
+        position: relative; left: -4px; top: -5px;
+        margin: 10px auto;
+        background: url("/images/3.jpg");
+        background-size: 930px;
+        border-radius: 12px; padding: 80px;
+    }
+    h4 { font-size: 25px; position: relative; top: 220px; left: 20px; text-shadow: 0 0 5px red; }
+    #nameError { font-size: 33px; }
+    #exitGroupBtn {
+        background: linear-gradient(70deg, red, #FF53A7);
+        box-shadow: 3px 2px 2px #000;
+        font-size: 26px; width: 180px; height: 80px;
+        position: absolute; top: -5px; left: 42rem;
+    }
+    #inviteLinkBtn { font-size: 22px; height: 50px; padding: 0 20px; }
+    #createGroupBtn {
+        font-size: 32px; box-shadow: 3px 5px 2px #000;
+        background-image: url("/images/1.jpg");
+        margin-top: 10rem; background-size: 200px;
+        animation: ani 1900ms infinite;
+    }
+    #createGroupBtn:hover { transform: scale(1.1); }
+    #joinGroupBtn {
+        margin-left: 22.3rem;
+        box-shadow: 3px 5px 5px 4px #000;
+        background: linear-gradient(30deg, #C894FF, #6015AF);
+        font-size: 30px; height: 50px; border: 3px solid #922AFF;
+    }
+    #joinGroupBtn:hover { transform: scale(0.96); border-radius: 5px; }
+    #currentGroupDisplay {
+        font-size: 32px; position: relative;
+        left: 19.2rem; top: 12.3rem;
+        color: #fff;
+        text-shadow: 0 0 4px #FF74EF, 0 0 6px #FF4EEA;
+    }
+    #status { font-size: 23px; }
+    #onlineUsers { font-size: 35px; }
+    .msg {
+        padding: 33px 30px; margin: 15px 0;
+        max-width: 70%; font-size: 35px;
+        transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+    .msg:active { transform: scale(0.97); filter: brightness(0.95); }
+    .msg:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.12); }
+    .msg.you { border-bottom-right-radius: 20px; border-top-left-radius: 15px; }
+    .msg.other { border-top-left-radius: 15px; animation: newMsg 0.29s ease-out; }
+    .msg.you::after {
+        right: -6px; bottom: 0;
+        width: 12px; height: 12px;
+        background: inherit;
+        clip-path: polygon(0 0, 100% 100%, 0 100%);
+        border: none;
+    }
+    .msg.other::after {
+        left: -6px; bottom: 0;
+        width: 17px; height: 17px;
+        background: inherit;
+        clip-path: polygon(100% 0, 100% 100%, 0 100%);
+        border: none;
+    }
+    @keyframes newMsg {
+        from { box-shadow: 0 0 0 rgba(0,0,0,0); }
+        to   { box-shadow: 0 2px 6px rgba(0,0,0,0.18); }
+    }
+    .msg .time { font-size: 30px; }
+    .tick { font-size: 22px; }
+    #messages { min-height: 1000px; }
+    #username { height: 50px; width: 250px; font-size: 25px; text-align: center; margin-bottom: 10px; }
+    .msg-main { height: 80px; margin-left: 25px; width: 700px; }
+    .msg::before {
+        content: "";
+        position: absolute; inset: 0;
+        border-radius: inherit;
+        background: linear-gradient(120deg, transparent, #E6D9FF, transparent);
+        transform: translateX(120%);
+        animation: energySweep 0.9s ease-out;
+    }
+    @keyframes energySweep { 10% { transform: translateX(-110%); } }
+    #sendBtn { width: 200px; font-size: 30px; }
+    .delete { font-size: 27px; margin-left: 20px; }
+    .date-separator { font-size: 27px; }
+    #adminPanel { position: fixed; left: 350px; top: 600px; width: 300px; padding: 22px; }
+    #adminPanel button { font-size: 23px; padding: 9px; }
+    input, textarea, select { font-size: 30px !important; }
+    @supports (-webkit-touch-callout: none) {
+        input, textarea { font-size: 27px !important; }
+    }
+    #dmMessages { height: 280px; }
+    .dm-msg { font-size: 28px; padding: 14px; }
+    #dmWithLabel { font-size: 30px; }
+    #closeDmBtn { font-size: 24px; height: 50px; }
+    #sendDmBtn { font-size: 28px; height: 80px; width: 180px; }
+    #dmBtn { font-size: 26px; padding: 8px 16px; }
+    #avatarPreview { width: 60px; height: 60px; }
+    #avatarInitial { font-size: 26px; }
+    .msg-avatar { width: 44px; height: 44px; font-size: 18px; }
+    .chat-img { max-width: 320px; max-height: 320px; }
+    #imgUploadLabel { font-size: 38px; padding: 6px 12px; }
+    #inviteLinkBtn { font-size: 26px; }
+}
+  </style>
 </head>
 <body>
-  
-  
 
 <div class="chat-container">
   <h4>Made By Pratik</h4>
-  
- <!-- Top bar -->
-<div id="topBar">
-  <span id="currentGroupDisplay">Group: Default </span>
-</div> 
-  <button id="createGroupBtn">+ Create Group</button>
-<button id="joinGroupBtn">Join Group</button>
-<button id="exitGroupBtn">Exit Group</button>
-</div>
-  <div id="status">● Offline</div>
-<div id="onlineUsers"></div>
-
-  <div id="messages"></div>
-    <div id="typing"></div>
-
-  <input id="username" placeholder="Enter your name">
-  <div id="nameError"></div>
-  
-  <div class="input-box">
-    <input class="msg-main"id="message"placeholder="Type message...">
-    <button id="sendBtn">Send</button>
+  <div id="topBar">
+    <span id="currentGroupDisplay">Group: Default </span>
   </div>
+  <button id="createGroupBtn">+ Create Group</button>
+  <button id="joinGroupBtn">Join Group</button>
+  <button id="exitGroupBtn">Exit Group</button>
+  <button id="inviteLinkBtn">🔗 Invite</button>
+</div>
+
+<div id="status">● Offline</div>
+<div id="onlineUsers"></div>
+<div id="messages"></div>
+<div id="typing"></div>
+
+<!-- Avatar + username row -->
+<div id="profileRow">
+  <div id="avatarPreview" onclick="document.getElementById('avatarInput').click()" title="Change avatar">
+    <span id="avatarInitial">?</span>
+    <img id="avatarImg" src="" style="display:none;">
+  </div>
+  <input id="username" placeholder="Enter your name">
+  <button id="dmBtn" title="Open DM">💬 DM</button>
+</div>
+<div id="nameError"></div>
+
+<!-- DM Panel -->
+<div id="dmPanel" style="display:none;">
+  <div id="dmHeader">
+    <span id="dmWithLabel">DM with: —</span>
+    <button id="closeDmBtn">✕ Close</button>
+  </div>
+  <div id="dmMessages"></div>
+  <div class="input-box">
+    <input class="msg-main" id="dmInput" placeholder="DM message...">
+    <button id="sendDmBtn">Send</button>
+  </div>
+</div>
+
+<!-- Hidden file inputs -->
+<input type="file" id="avatarInput" accept="image/*" style="display:none;">
+
+<div class="input-box">
+  <label id="imgUploadLabel" title="Send image">
+    📷
+    <input type="file" id="imgInput" accept="image/*" style="display:none;">
+  </label>
+  <input class="msg-main" id="message" placeholder="Type message...">
+  <button id="sendBtn">Send</button>
 </div>
 
 <audio id="notifySound" preload="auto">
   <source src="/sounds/notification.mp3" type="audio/mpeg">
 </audio>
 
-<!-- ADMIN LIFEBOAT -->
+<!-- ADMIN PANEL -->
 <div id="adminPanel">
   <h3>🛟 Admin</h3>
-  
-  <!-- ===== GROUP CONTROL ===== -->
   <button onclick="adminClearGroup()">🧹 Clear Group</button>
-  
   <hr>
-  
-  <!-- ===== USER CONTROL ===== -->
   <input id="targetUser" placeholder="Username">
-  
   <button onclick="adminMute()">🔇 Mute 10 min</button>
   <button onclick="adminUnmute()">🔊 Unmute</button>
-  
   <button onclick="adminKick()">🚫 Kick User</button>
-  
   <button onclick="adminShadowMute()">👻 Shadow Mute</button>
   <button onclick="adminShadowUnmute()">🔊 Shadow Unmute</button>
-  
   <hr>
-  
-  <!-- ===== MESSAGE CONTROL ===== -->
   <input id="lockMessageId" placeholder="Message ID">
-  
   <button onclick="adminLockMessage()">🔒 Lock Message</button>
   <button onclick="adminUnlockMessage()">🔓 Unlock Message</button>
-  
   <hr>
-  
-  <!-- ===== ANNOUNCEMENT ===== -->
   <button onclick="adminAnnouncement()">📢 Announcement</button>
-  
   <hr>
-  
-  <!-- ===== SLASH COMMAND SYSTEM ===== -->
   <input id="adminCommand" placeholder="/mute user 10">
-  
   <button onclick="runAdminCommand()">⚡ Run Command</button>
 </div>
 
-<!-- ===== TOGGLE BUTTON ===== -->
 <div id="adminToggle" onclick="toggleAdminPanel()">🛟</div>
 
+<script>
+// ================= FIREBASE CONFIG =================
+var firebaseConfig = {
+  apiKey: "AIzaSyDqpgpMsPKrOp3hveeKerTXl5mwSeGA9_0",
+  authDomain: "chatapp-b2062.firebaseapp.com",
+  databaseURL: "https://chatapp-b2062-default-rtdb.asia-southeast1.firebasedatabase.app/",
+  projectId: "chatapp-b2062",
+  storageBucket: "chatapp-b2062.firebasestorage.app",
+  messagingSenderId: "413990053783",
+  appId: "1:413990053783:web:478f79f329a2b0283146d2",
+};
+firebase.initializeApp(firebaseConfig);
+var db = firebase.database();
 
+// ================= CLOUDINARY CONFIG =================
+const CLOUDINARY_CLOUD = "duqrkuomt";
+const CLOUDINARY_PRESET = "Chather";
 
-<script src="script.js"></script>
+async function uploadToCloudinary(file) {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", CLOUDINARY_PRESET);
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {
+    method: "POST", body: formData
+  });
+  const data = await res.json();
+  return data.secure_url;
+}
 
+// ================= ELEMENTS =================
+var usernameInput       = document.getElementById("username");
+var messageInput        = document.getElementById("message");
+var messagesDiv         = document.getElementById("messages");
+var sendBtn             = document.getElementById("sendBtn");
+var statusDiv           = document.getElementById("status");
+var typingDiv           = document.getElementById("typing");
+var notifySound         = document.getElementById("notifySound");
+var createGroupBtn      = document.getElementById("createGroupBtn");
+var joinGroupBtn        = document.getElementById("joinGroupBtn");
+var exitGroupBtn        = document.getElementById("exitGroupBtn");
+var onlineDiv           = document.getElementById("onlineUsers");
+var currentGroupDisplay = document.getElementById("currentGroupDisplay");
+var inviteLinkBtn       = document.getElementById("inviteLinkBtn");
+var imgInput            = document.getElementById("imgInput");
+var avatarInput         = document.getElementById("avatarInput");
+var avatarPreview       = document.getElementById("avatarPreview");
+var avatarInitial       = document.getElementById("avatarInitial");
+var avatarImgEl         = document.getElementById("avatarImg");
+var dmBtn               = document.getElementById("dmBtn");
+var dmPanel             = document.getElementById("dmPanel");
+var dmMessages          = document.getElementById("dmMessages");
+var dmInput             = document.getElementById("dmInput");
+var sendDmBtn           = document.getElementById("sendDmBtn");
+var closeDmBtn          = document.getElementById("closeDmBtn");
+var dmWithLabel         = document.getElementById("dmWithLabel");
 
+let unreadDividerAdded = false;
+function getLastSeenKey() { return "lastSeen_" + currentGroup; }
+
+// ================= GLOBAL VARIABLES =================
+var currentGroup = "default";
+let soundEnabled = false;
+let isAtBottom   = true;
+let lastDateLabel = "";
+sendBtn.disabled = false;
+let dmTarget   = null;
+let dmListener = null;
+
+// ================= ADMIN CONFIG =================
+const ADMIN_NAME = "Pratz1";
+let isAdmin = false;
+
+// ================= AVATAR HELPERS =================
+function getAvatarUrl(username) {
+  return new Promise(resolve => {
+    db.ref("avatars/" + username).once("value").then(snap => {
+      resolve(snap.exists() ? snap.val() : null);
+    });
+  });
+}
+function colorForName(name) {
+  let hash = 0;
+  for (let c of name) hash = c.charCodeAt(0) + ((hash << 5) - hash);
+  return `hsl(${Math.abs(hash) % 360}, 65%, 55%)`;
+}
+function renderAvatarEl(username, avatarUrl) {
+  const wrap = document.createElement("div");
+  wrap.className = "msg-avatar";
+  if (avatarUrl) {
+    const img = document.createElement("img");
+    img.src = avatarUrl;
+    wrap.appendChild(img);
+  } else {
+    wrap.style.background = colorForName(username);
+    wrap.textContent = username.charAt(0).toUpperCase();
+  }
+  return wrap;
+}
+function refreshOwnAvatar() {
+  const name = usernameInput.value.trim();
+  if (!name) return;
+  getAvatarUrl(name).then(url => {
+    if (url) {
+      avatarImgEl.src = url;
+      avatarImgEl.style.display = "block";
+      avatarInitial.style.display = "none";
+    } else {
+      avatarImgEl.style.display = "none";
+      avatarInitial.style.display = "block";
+      avatarInitial.textContent = name.charAt(0).toUpperCase();
+      avatarPreview.style.background = colorForName(name);
+    }
+  });
+}
+avatarInput.addEventListener("change", async () => {
+  const file = avatarInput.files[0];
+  if (!file) return;
+  const name = usernameInput.value.trim();
+  if (!name) { alert("Set a username first!"); return; }
+  statusDiv.innerText = "⏳ Uploading avatar...";
+  try {
+    const url = await uploadToCloudinary(file);
+    await db.ref("avatars/" + name).set(url);
+    refreshOwnAvatar();
+    statusDiv.innerText = "✅ Avatar updated!";
+    setTimeout(() => initStatus(), 1500);
+  } catch(e) { statusDiv.innerText = "❌ Avatar upload failed"; }
+});
+
+// ================= ADMIN FUNCTIONS =================
+function toggleAdminPanel() {
+  if (!isAdmin) return;
+  const panel = document.getElementById("adminPanel");
+  panel.style.display = panel.style.display === "block" ? "none" : "block";
+}
+window.addEventListener("load", () => {
+  if (!isAdmin) {
+    document.getElementById("adminPanel").style.display = "none";
+    document.getElementById("adminToggle").style.display = "none";
+  }
+  const params = new URLSearchParams(window.location.search);
+  const inviteGroup = params.get("invite");
+  if (inviteGroup) handleInviteLink(inviteGroup);
+});
+function adminMute() {
+  if (!isAdmin) return;
+  const user = document.getElementById("targetUser").value.trim();
+  if (!user) return;
+  db.ref("mutedUsers/" + user).set(Date.now() + 10 * 60 * 1000);
+  alert(user + " muted for 10 minutes");
+}
+function adminUnmute() {
+  if (!isAdmin) return;
+  const user = document.getElementById("targetUser").value.trim();
+  if (!user) return;
+  db.ref("mutedUsers/" + user).remove();
+  alert(user + " unmuted");
+}
+function adminClearGroup() {
+  if (!confirm("Clear all messages?")) return;
+  db.ref("groupMessages/" + currentGroup).remove();
+}
+function adminAnnouncement() {
+  const text = prompt("Announcement text");
+  if (!text) return;
+  db.ref("groupMessages/" + currentGroup).push({ name: "ADMIN", text: "📢 " + text, admin: true, time: Date.now() });
+}
+function adminKick() {
+  if (!isAdmin) return;
+  const user = document.getElementById("targetUser").value.trim();
+  if (!user) return;
+  db.ref(`groupMembers/${currentGroup}/${user}`).remove();
+  db.ref(`status/${user}`).set("offline");
+  alert(user + " kicked from group");
+}
+function adminShadowMute() {
+  if (!isAdmin) return;
+  const user = document.getElementById("targetUser").value.trim();
+  if (!user) return;
+  db.ref("shadowMuted/" + user).set(true);
+  alert(user + " shadow muted");
+}
+function adminShadowUnmute() {
+  if (!isAdmin) return;
+  const user = document.getElementById("targetUser").value.trim();
+  if (!user) return;
+  db.ref("shadowMuted/" + user).remove();
+  alert(user + " shadow unmuted");
+}
+function adminLockMessage() {
+  if (!isAdmin) return;
+  const msgId = document.getElementById("lockMessageId").value.trim();
+  if (!msgId) return;
+  db.ref(`groupMessages/${currentGroup}/${msgId}/locked`).set(true);
+  alert("Message locked");
+}
+function adminUnlockMessage() {
+  if (!isAdmin) return;
+  const msgId = document.getElementById("lockMessageId").value.trim();
+  if (!msgId) return;
+  db.ref(`groupMessages/${currentGroup}/${msgId}/locked`).remove();
+  alert("Message unlocked");
+}
+function runAdminCommand() {
+  if (!isAdmin) return;
+  const cmd = document.getElementById("adminCommand").value.trim();
+  if (!cmd.startsWith("/")) return;
+  const parts = cmd.split(" ");
+  switch (parts[0]) {
+    case "/kick":   document.getElementById("targetUser").value = parts[1]; adminKick(); break;
+    case "/mute":   document.getElementById("targetUser").value = parts[1]; adminMute(); break;
+    case "/clear":  adminClearGroup(); break;
+    case "/announce": adminAnnouncement(); break;
+    default: alert("Unknown command");
+  }
+  document.getElementById("adminCommand").value = "";
+}
+
+// ================= USERNAME & STATUS =================
+const savedName = localStorage.getItem("username");
+if (savedName) { usernameInput.value = savedName; initStatus(); refreshOwnAvatar(); }
+if (savedName === ADMIN_NAME) isAdmin = true;
+
+function initStatus() {
+  var username = usernameInput.value;
+  if (!username) return;
+  var statusRef = db.ref("status/" + username);
+  statusRef.set("online");
+  statusRef.onDisconnect().set("offline");
+  statusRef.on("value", snapshot => {
+    statusDiv.innerText = snapshot.exists() && snapshot.val() === "online" ? "● Online" : "● Offline";
+  });
+}
+initStatus();
+
+const USERNAME_COOLDOWN_MINUTES = 1;
+let usernameTimer;
+var nameErrorDiv = document.getElementById("nameError");
+
+usernameInput.addEventListener("input", () => {
+  clearTimeout(usernameTimer);
+  usernameTimer = setTimeout(() => {
+    const name = usernameInput.value.trim();
+    if (!name) { nameErrorDiv.innerText = "Username cannot be empty"; sendBtn.disabled = true; return; }
+    db.ref("status/" + name).once("value").then(snapshot => {
+      if (snapshot.exists() && snapshot.val() === "online") {
+        nameErrorDiv.innerText = "This username is already online";
+        sendBtn.disabled = true;
+        return;
+      }
+      nameErrorDiv.innerText = "";
+      sendBtn.disabled = false;
+      localStorage.setItem("username", name);
+      db.ref("users/" + name).set(true);
+      isAdmin = (name === ADMIN_NAME);
+      initStatus();
+      refreshOwnAvatar();
+    });
+  }, 500);
+});
+
+// ================= GROUP DISPLAY =================
+function updateGroupDisplay() { currentGroupDisplay.innerText = "Group: " + currentGroup; }
+
+// ================= GROUP MEMBERSHIP =================
+function setGroupMemberStatus(groupName) {
+  var username = usernameInput.value;
+  if (!username) return;
+  var memberRef = db.ref(`groupMembers/${groupName}/${username}`);
+  memberRef.set(true);
+  memberRef.onDisconnect().remove();
+  updateOnlineUsers();
+}
+function updateOnlineUsers() {
+  if (!onlineDiv) return;
+  db.ref(`groupMembers/${currentGroup}`).on("value", snapshot => {
+    var groupMembers = snapshot.val() || {};
+    var memberKeys = Object.keys(groupMembers);
+    if (memberKeys.length === 0) { onlineDiv.innerText = "No members online"; return; }
+    var membersList = [];
+    memberKeys.forEach(username => {
+      db.ref(`status/${username}`).once("value").then(snap => {
+        if (snap.exists() && snap.val() === "online") membersList.push(username);
+        onlineDiv.innerText = "Online: " + membersList.join(", ");
+      });
+    });
+  });
+}
+
+// ================= CREATE GROUP =================
+createGroupBtn.addEventListener("click", () => {
+  var groupName = prompt("Enter Group Name:");
+  if (!groupName) return;
+  var groupPassword = prompt("Set a password for this group:");
+  if (!groupPassword) return;
+  db.ref("groups/" + groupName).set({ password: groupPassword, createdAt: Date.now() });
+  alert(`Group "${groupName}" created!`);
+  joinGroupFirebase(groupName);
+});
+
+// ================= JOIN GROUP =================
+joinGroupBtn.addEventListener("click", () => {
+  var groupName = prompt("Enter Group Name to join:");
+  if (!groupName) return;
+  db.ref("groups/" + groupName).once("value").then(snapshot => {
+    if (!snapshot.exists()) { alert("Group does not exist!"); return; }
+    var groupData = snapshot.val();
+    var enteredPassword = prompt(`Enter password for ${groupName}:`);
+    if (enteredPassword === groupData.password) joinGroupFirebase(groupName);
+    else alert("Incorrect password!");
+  });
+});
+
+function joinGroupFirebase(groupName) {
+  currentGroup = groupName;
+  isAdmin = (usernameInput.value === ADMIN_NAME);
+  localStorage.setItem("currentGroup", currentGroup);
+  messagesDiv.innerHTML = "";
+  lastDateLabel = "";
+  localStorage.setItem(getLastSeenKey(), Date.now());
+  unreadDividerAdded = false;
+  loadGroupMessages();
+  setGroupMemberStatus(currentGroup);
+  updateOnlineUsers();
+  updateGroupDisplay();
+}
+
+// ================= EXIT GROUP =================
+exitGroupBtn.addEventListener("click", () => {
+  if (currentGroup === "default") { alert("You are already in the default group!"); return; }
+  db.ref(`groupMembers/${currentGroup}/${usernameInput.value}`).remove();
+  currentGroup = "default";
+  localStorage.setItem("currentGroup", currentGroup);
+  messagesDiv.innerHTML = "";
+  setGroupMemberStatus(currentGroup);
+  loadGroupMessages();
+  updateOnlineUsers();
+  updateGroupDisplay();
+  alert("You have exited the group.");
+});
+
+// ================= INVITE LINK =================
+inviteLinkBtn.addEventListener("click", () => {
+  const base = window.location.origin + window.location.pathname;
+  const link = `${base}?invite=${encodeURIComponent(currentGroup)}`;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(link).then(() => alert("✅ Invite link copied!\n\n" + link));
+  } else {
+    prompt("Copy this invite link:", link);
+  }
+});
+function handleInviteLink(groupName) {
+  db.ref("groups/" + groupName).once("value").then(snapshot => {
+    if (!snapshot.exists()) { alert("This group no longer exists."); return; }
+    const groupData = snapshot.val();
+    if (!confirm(`You've been invited to group "${groupName}". Join?`)) return;
+    const pw = prompt(`Enter password for "${groupName}":`);
+    if (pw === groupData.password) joinGroupFirebase(groupName);
+    else alert("Incorrect password!");
+    window.history.replaceState({}, document.title, window.location.pathname);
+  });
+}
+
+// ================= SEND MESSAGE =================
+sendBtn.addEventListener("click", sendMessage);
+messageInput.addEventListener("keydown", e => { if (e.key === "Enter") sendMessage(); });
+
+function sendMessage() {
+  const name = usernameInput.value;
+  const text = messageInput.value;
+  if (!name || !text) return;
+  db.ref("mutedUsers/" + name).once("value").then(muteSnap => {
+    if (muteSnap.exists()) {
+      const until = muteSnap.val();
+      if (Date.now() < until) {
+        alert("🔇 You are muted until " + new Date(until).toLocaleTimeString());
+        statusDiv.innerText = "🔇 You are muted";
+        setTimeout(() => { db.ref("mutedUsers/" + name).remove(); statusDiv.innerText = ""; }, until - Date.now());
+        return;
+      } else { db.ref("mutedUsers/" + name).remove(); statusDiv.innerText = ""; }
+    }
+    db.ref("shadowMuted/" + name).once("value").then(shadowSnap => {
+      if (shadowSnap.exists()) { alert("👻 You are shadow muted. Message not sent."); messageInput.value = ""; return; }
+      const msgRef = db.ref("groupMessages/" + currentGroup).push();
+      msgRef.set({ id: msgRef.key, name, text, seen: false, time: Date.now() });
+      messageInput.value = "";
+    });
+  });
+}
+
+// ================= IMAGE UPLOAD & SEND =================
+imgInput.addEventListener("change", async () => {
+  const file = imgInput.files[0];
+  if (!file) return;
+  const name = usernameInput.value.trim();
+  if (!name) { alert("Set a username first!"); return; }
+  statusDiv.innerText = "⏳ Uploading image...";
+  try {
+    const url = await uploadToCloudinary(file);
+    const msgRef = db.ref("groupMessages/" + currentGroup).push();
+    msgRef.set({ id: msgRef.key, name, text: "", imageUrl: url, seen: false, time: Date.now() });
+    statusDiv.innerText = "✅ Image sent!";
+    setTimeout(() => initStatus(), 1500);
+  } catch(e) { statusDiv.innerText = "❌ Upload failed"; }
+  imgInput.value = "";
+});
+
+// ================= TYPING INDICATOR =================
+var typingRef = db.ref("typing");
+messageInput.addEventListener("input", () => {
+  if (!usernameInput.value) return;
+  typingRef.set(usernameInput.value + "|" + currentGroup);
+  setTimeout(() => typingRef.remove(), 800);
+});
+typingRef.on("value", snapshot => {
+  if (!snapshot.exists()) { typingDiv.innerText = ""; return; }
+  var val = snapshot.val().split("|");
+  typingDiv.innerText = (val[0] !== usernameInput.value && val[1] === currentGroup) ? val[0] + " is typing..." : "";
+});
+
+// ================= FORMAT TIME =================
+function formatTime(timestamp) {
+  const date = new Date(timestamp);
+  let hours = date.getHours(), minutes = date.getMinutes();
+  const ampm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12 || 12;
+  if (minutes < 10) minutes = "0" + minutes;
+  return hours + ":" + minutes + " " + ampm;
+}
+function getDateLabel(time) {
+  const msgDate = new Date(Number(time));
+  const startToday = new Date(); startToday.setHours(0,0,0,0);
+  const startYesterday = new Date(startToday); startYesterday.setDate(startYesterday.getDate()-1);
+  if (msgDate >= startToday) return "Today";
+  if (msgDate >= startYesterday) return "Yesterday";
+  return String(msgDate.getDate()).padStart(2,"0")+"/"+String(msgDate.getMonth()+1).padStart(2,"0")+"/"+msgDate.getFullYear();
+}
+
+// ================= LOAD GROUP MESSAGES =================
+function loadGroupMessages() {
+  const ref = db.ref("groupMessages/" + currentGroup).limitToLast(100);
+  messagesDiv.innerHTML = "";
+  ref.off();
+  ref.on("child_added", snapshot => {
+    const shouldStick = messagesDiv.scrollTop + messagesDiv.clientHeight >= messagesDiv.scrollHeight - 40;
+    displayMessage(snapshot);
+    if (shouldStick) requestAnimationFrame(() => { messagesDiv.scrollTop = messagesDiv.scrollHeight; });
+  });
+  ref.on("child_changed", snapshot => updateSeen(snapshot));
+  ref.on("child_removed", snapshot => {
+    const msgDiv = document.getElementById(snapshot.key);
+    if (msgDiv) msgDiv.remove();
+  });
+}
+
+// ================= DISPLAY MESSAGE =================
+function displayMessage(snapshot) {
+  const data = snapshot.val();
+  if (!data || !data.name) return;
+  const myName = usernameInput.value;
+  const currentLabel = getDateLabel(data.time);
+  if (currentLabel !== lastDateLabel) {
+    const dateDiv = document.createElement("div");
+    dateDiv.className = "date-separator";
+    dateDiv.innerHTML = `<span>${currentLabel}</span>`;
+    messagesDiv.appendChild(dateDiv);
+    lastDateLabel = currentLabel;
+  }
+  const msgDiv = document.createElement("div");
+  msgDiv.className = "msg " + (data.name === myName ? "you" : "other");
+  msgDiv.id = snapshot.key;
+
+  getAvatarUrl(data.name).then(avatarUrl => {
+    const header = document.createElement("div");
+    header.className = "msg-header";
+    if (data.name !== myName) header.appendChild(renderAvatarEl(data.name, avatarUrl));
+    const nameSpan = document.createElement("b");
+    nameSpan.textContent = data.name + ": ";
+    header.appendChild(nameSpan);
+    msgDiv.appendChild(header);
+
+    if (data.imageUrl) {
+      const img = document.createElement("img");
+      img.src = data.imageUrl; img.className = "chat-img";
+      img.onclick = () => openLightbox(data.imageUrl);
+      msgDiv.appendChild(img);
+    } else if (data.text) {
+      msgDiv.appendChild(document.createTextNode(data.text));
+    }
+
+    if (data.name === myName) {
+      const tickSpan = document.createElement("span");
+      tickSpan.className = "tick" + (data.seen ? " seen" : "");
+      tickSpan.textContent = data.seen ? "✔✔" : "✔";
+      msgDiv.appendChild(tickSpan);
+    }
+    if (data.name === myName || isAdmin) {
+      const delSpan = document.createElement("span");
+      delSpan.className = "delete"; delSpan.textContent = " delete";
+      delSpan.onclick = () => deleteMessage(snapshot.key);
+      msgDiv.appendChild(delSpan);
+    }
+    if (data.name !== myName) {
+      const dmQuick = document.createElement("span");
+      dmQuick.style.cssText = "font-size:11px;margin-left:6px;cursor:pointer;color:#6015AF;";
+      dmQuick.textContent = "💬"; dmQuick.title = "DM " + data.name;
+      dmQuick.onclick = () => openDM(data.name);
+      msgDiv.appendChild(dmQuick);
+    }
+    const timeSpan = document.createElement("span");
+    timeSpan.className = "time"; timeSpan.textContent = formatTime(data.time);
+    msgDiv.appendChild(timeSpan);
+    messagesDiv.appendChild(msgDiv);
+
+    if (data.name !== myName) {
+      db.ref(`groupMessages/${currentGroup}/${snapshot.key}/seen`).set(true);
+      if (soundEnabled) { notifySound.currentTime = 0; notifySound.play(); }
+    }
+  });
+}
+
+// ================= UPDATE SEEN =================
+function updateSeen(snapshot) {
+  const data = snapshot.val();
+  if (data.name === usernameInput.value && data.seen) {
+    const msgDiv = document.getElementById(snapshot.key);
+    if (!msgDiv) return;
+    const tick = msgDiv.querySelector(".tick");
+    if (tick) { tick.innerText = "✔✔"; tick.classList.add("seen"); }
+  }
+}
+
+// ================= DELETE MESSAGE =================
+function deleteMessage(msgId) {
+  const msgDiv = document.getElementById(msgId);
+  if (!msgDiv) return;
+  db.ref(`groupMessages/${currentGroup}/${msgId}/locked`).once("value").then(snap => {
+    if (snap.exists()) { statusDiv.innerText = "🔒 This message is locked"; return; }
+    if (!isAdmin && !msgDiv.classList.contains("you")) return;
+    const bg = window.getComputedStyle(msgDiv).backgroundColor;
+    for (let i = 0; i < 20; i++) {
+      const dust = document.createElement("div");
+      dust.className = "dust"; dust.style.background = bg;
+      dust.style.left = Math.random() * msgDiv.offsetWidth + "px";
+      dust.style.top = Math.random() * msgDiv.offsetHeight + "px";
+      dust.style.setProperty("--x", (Math.random() - 0.5) * 100 + "px");
+      dust.style.setProperty("--y", (Math.random() - 0.5) * 100 + "px");
+      msgDiv.appendChild(dust);
+      setTimeout(() => dust.remove(), 600);
+    }
+    msgDiv.style.transition = "transform 0.35s ease, opacity 0.35s ease";
+    msgDiv.style.transform = "scale(0.75)"; msgDiv.style.opacity = "0";
+    setTimeout(() => { db.ref(`groupMessages/${currentGroup}/${msgId}`).remove(); }, 350);
+  });
+}
+
+// ================= LIGHTBOX =================
+function openLightbox(url) {
+  let lb = document.getElementById("lightbox");
+  if (!lb) {
+    lb = document.createElement("div"); lb.id = "lightbox";
+    lb.innerHTML = `<img id="lbImg" src=""><span style="position:fixed;top:20px;right:30px;font-size:36px;color:#fff;cursor:pointer;" onclick="closeLightbox()">✕</span>`;
+    lb.addEventListener("click", e => { if (e.target === lb) closeLightbox(); });
+    document.body.appendChild(lb);
+  }
+  document.getElementById("lbImg").src = url;
+  lb.classList.add("active");
+}
+function closeLightbox() { const lb = document.getElementById("lightbox"); if (lb) lb.classList.remove("active"); }
+
+// ================= DM (PRIVATE MESSAGES) =================
+function getDMKey(a, b) { return [a, b].sort().join("__"); }
+
+function openDM(targetUsername) {
+  const myName = usernameInput.value.trim();
+  if (!myName) { alert("Set your username first!"); return; }
+  if (targetUsername === myName) { alert("You can't DM yourself!"); return; }
+  dmTarget = targetUsername;
+  dmWithLabel.textContent = "DM with: " + targetUsername;
+  dmPanel.style.display = "block";
+  dmMessages.innerHTML = "";
+  if (dmListener) db.ref("dms/" + getDMKey(myName, dmTarget)).off("child_added", dmListener);
+  const dmRef = db.ref("dms/" + getDMKey(myName, dmTarget)).limitToLast(50);
+  dmListener = dmRef.on("child_added", snapshot => {
+    const data = snapshot.val();
+    if (!data) return;
+    const div = document.createElement("div");
+    div.className = "dm-msg " + (data.from === myName ? "you" : "other");
+    const nameEl = document.createElement("div");
+    nameEl.className = "dm-name"; nameEl.textContent = data.from;
+    div.appendChild(nameEl);
+    if (data.imageUrl) {
+      const img = document.createElement("img");
+      img.src = data.imageUrl; img.className = "chat-img";
+      img.onclick = () => openLightbox(data.imageUrl);
+      div.appendChild(img);
+    } else {
+      div.appendChild(document.createTextNode(data.text || ""));
+    }
+    const timeEl = document.createElement("span");
+    timeEl.className = "dm-time"; timeEl.textContent = formatTime(data.time);
+    div.appendChild(timeEl);
+    dmMessages.appendChild(div);
+    dmMessages.scrollTop = dmMessages.scrollHeight;
+  });
+  dmInput.focus();
+}
+
+dmBtn.addEventListener("click", () => {
+  const target = prompt("Enter username to DM:");
+  if (target && target.trim()) openDM(target.trim());
+});
+closeDmBtn.addEventListener("click", () => {
+  dmPanel.style.display = "none";
+  if (dmListener && dmTarget) {
+    db.ref("dms/" + getDMKey(usernameInput.value.trim(), dmTarget)).off("child_added", dmListener);
+    dmListener = null;
+  }
+  dmTarget = null;
+});
+function sendDM() {
+  const myName = usernameInput.value.trim();
+  const text = dmInput.value.trim();
+  if (!myName || !text || !dmTarget) return;
+  db.ref("dms/" + getDMKey(myName, dmTarget)).push({ from: myName, to: dmTarget, text, time: Date.now() });
+  dmInput.value = "";
+}
+sendDmBtn.addEventListener("click", sendDM);
+dmInput.addEventListener("keydown", e => { if (e.key === "Enter") sendDM(); });
+
+// ================= NOTIFICATION SOUND =================
+let soundUnlocked = false;
+function unlockSound() {
+  if (soundUnlocked) return;
+  notifySound.muted = true;
+  notifySound.play().then(() => {
+    notifySound.pause(); notifySound.currentTime = 0;
+    notifySound.muted = false; soundUnlocked = true; soundEnabled = true;
+  }).catch(() => {});
+}
+messagesDiv.addEventListener("scroll", () => {
+  isAtBottom = messagesDiv.scrollTop + messagesDiv.clientHeight >= messagesDiv.scrollHeight - 20;
+});
+
+// ================= CLEAN OLD MESSAGES =================
+function cleanOldMessages(days = 7) {
+  const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+  const ref = db.ref("groupMessages/" + currentGroup);
+  ref.orderByChild("time").endAt(cutoff).once("value", snapshot => {
+    snapshot.forEach(msg => { ref.child(msg.key).remove(); });
+  });
+}
+
+// ================= INITIAL LOAD =================
+document.addEventListener("click", unlockSound, { once: true });
+document.addEventListener("touchstart", unlockSound, { once: true });
+document.addEventListener("keydown", unlockSound, { once: true });
+
+var savedGroup = localStorage.getItem("currentGroup");
+if (savedGroup) currentGroup = savedGroup;
+
+updateGroupDisplay();
+setGroupMemberStatus(currentGroup);
+updateOnlineUsers();
+loadGroupMessages();
+joinGroupFirebase(currentGroup);
+cleanOldMessages();
+setInterval(() => { cleanOldMessages(); }, 60 * 60 * 1000);
+</script>
 </body>
 </html>
