@@ -2,7 +2,6 @@
 body {
     background: #E6D9FF;
     font-family: Arial, sans-serif;
-
     overscroll-behavior: contain;
 
 }
@@ -163,6 +162,28 @@ input {
 
 }
 
+#createGroupBtn{
+    
+    box-shadow: 3px 5px 2px #000;
+    margin-top: 120px;
+    background-image:url("/images/1.jpg");
+    background-size: 400px;
+    animation:ani 1900ms infinite;
+    
+}
+
+#createGroupBtn:hover{
+    transform: scale(1.1);
+}
+@keyframes ani{
+    10%{
+        background-position: 200%;
+    }
+20%{
+    background-position: 0%;
+
+}
+}
 button {
     background: #25d366;
     color: white;
@@ -170,6 +191,7 @@ button {
     padding: 8px 12px;
     cursor: pointer;
 }
+
 
 .tick {
   font-size: 11px;
